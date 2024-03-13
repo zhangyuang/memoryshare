@@ -1,95 +1,65 @@
-# 在 Node.js 不同进程间共享内存
+# Share Memory
 
-`memoryshare` 是一个由 `Rust + Napi` 开发，可以在 `Node.js` 不同进程中共享 `String|Object|Function` 内存的模块。
+`memoryshare` 用于在不同的 Node.js 进程间共享内存
 
-## 支持的功能
+当数据量庞大的时候 `memoryshare` 具有更高的性能相比于使用 IPC 通道的方式传递数据
 
-🚀 表示已经实现的功能
+## 功能
 
-| 里程碑                                                                                                                                                                                                                                          | 状态 |
-| -------------------------------------------------------------------------------------------------------------------------------------- | ---- |
-|  支持回收内存    | 🚀    |
-|  支持跨进程共享字符串    | 🚀    |
-|  支持跨进程共享 byteArray    | 🚀    |
+- 高性能 ✨
+- 更简单的 api 接口 💗
 
+## benchmark
 
+```bash
+$ yarn bench
+
+ipc:
+  34 ops/s, ±55.24%       | slowest, 99.73% slower
+
+sharememory:
+  12 412 ops/s, ±44.21%   | fastest
+
+Finished 2 cases!
+Fastest: sharememory
+Slowest: ipc
+✨  Done in 28.89s.
+```
+
+## 安装
+
+```bash
+$ npm i memoryshare # or yarn add memoryshare
+```
 
 ## 如何使用
 
-```js
-// parent.js
-const { fork } = require('child_process')
+`memoryshare` 支持传递能够被序列化为字符串类型的数据
 
-const sharedMemory = require('memoryshare')
-
-const stringLink = "string.link" // 设置一个内存id memoryId
-
-sharedMemory.setString(stringLink, "shared String") // 使用该内存 id 存储需要共享的字符串
-console.log('Read shared string in parent process', sharedMemory.getString(stringLink))
-const child = fork('./child')
-
-child.send('ready')
-child.on('message', msg => {
-  if (msg === 'finish') {
-    sharedMemory.clear(stringLink) // 当不需要使用后记得在主进程销毁该内存块
-  }
-})
-
-// child.js
-
-const sharedMemory = require('memoryshare')
-process.on("message", msg => {
-  if (msg === "ready") {
-    console.log('Read shared string in child process', sharedMemory.getString("string.link"))
-    process.send("finish")
-    process.exit()
-  }
-})
-
-```
-# shared memory for Node.js Process by Rust Napi
-
-`memoryshare` is a module developed using Rust + Napi that allows sharing String|Object|Function memory between different processes in Node.js.
-
-## Features Implemented
-
-🚀 represent features which has been implemented
-
-| 里程碑                                                                                                                                                                                                                                          | 状态 |
-| -------------------------------------------------------------------------------------------------------------------------------------- | ---- |
-|  Support memory recycling	    | 🚀    |
-|  Support sharing strings across processes	    | 🚀    |
-|  Support sharing JsObjects across processes (under development)    | In progress    |
-
-
-# How to use
+下面的例子描述了如何使用 `memoryshare` 来共享内存
 
 ```js
-// parent.js
-const { fork } = require('child_process')
+// main.js
+import { fork } from 'child_process'
+import { init, setString, getString, clear } from 'memoryshare'
 
-const sharedMemory = require('memoryshare')
+const memId = "string.link"
 
-const stringLink = "string.link" // Set a memory id memoryId
-sharedMemory.setString(stringLink, "shared String") // Store the string to be shared using the memory id
-console.log('Read shared string in parent process', sharedMemory.getString(stringLink))
-const child = fork('./child')
+init(memId, 4096) // 每一个 memId 的初始化操作只需要做一次
 
-child.send('ready')
-child.on('message', msg => {
-  if (msg === 'finish') {
-    sharedMemory.clear(stringLink) // Remember to destroy the memory block in the main process when it is no longer needed
+function generateBigString() {
+  let bigStr = '';
+  for (let i = 0; i < 1; i++) {
+    bigStr += 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. ';
   }
-})
+  return bigStr;
+}
+
+setString(memId, generateBigString())
+
+fork('./child')
 
 // child.js
-
-const sharedMemory = require('memoryshare')
-process.on("message", msg => {
-  if (msg === "ready") {
-    console.log('Read shared string in child process', sharedMemory.getString("string.link"))
-    process.send("finish")
-    process.exit()
-  }
-})
+const memId = "string.link"
+const data = getString(memId)
 ```

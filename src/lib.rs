@@ -1,22 +1,17 @@
 #[macro_use]
 extern crate napi_derive;
 
-use std::collections::HashMap;
-
 use napi::{Error, Result, Status};
 use shared_memory::{Shmem, ShmemConf};
+use std::fs::{metadata, remove_file};
 
-pub struct SHMEM {
-  shmem: Shmem,
-  data_len: usize,
-  max_size: u32,
-}
 pub enum ShareMemoryError {
   NapiError(Error<Status>),
   UnExpectedError,
   Panic(String),
   SizeOverflow,
   Uninitialized,
+  RepeatInitialized,
 }
 impl AsRef<str> for ShareMemoryError {
   fn as_ref(&self) -> &str {
@@ -26,6 +21,7 @@ impl AsRef<str> for ShareMemoryError {
       ShareMemoryError::Panic(desc) => desc,
       ShareMemoryError::SizeOverflow => "data length exceeds over maxium length",
       ShareMemoryError::Uninitialized => "memory id is uninitialized",
+      ShareMemoryError::RepeatInitialized => "memory id has been initialized",
     }
   }
 }
@@ -35,41 +31,58 @@ impl From<ShareMemoryError> for Error {
   }
 }
 
-static mut GLOBAL_SHMEM: Option<HashMap<String, SHMEM>> = None;
-
 #[napi]
 unsafe fn get_string(mem_id: String) -> Result<String> {
-  let shmem = ShmemConf::new().flink(mem_id).open().unwrap();
+  let shmem = ShmemConf::new()
+    .flink(mem_id)
+    .open()
+    .map_err(|_| ShareMemoryError::Uninitialized)?;
+  let len_slice = std::slice::from_raw_parts(shmem.as_ptr(), 4);
+  let len = u32::from_ne_bytes(len_slice.try_into().unwrap());
 
-  let slice = std::slice::from_raw_parts(shmem.as_ptr(), 4096);
+  let slice = std::slice::from_raw_parts(shmem.as_ptr().offset(4), len as usize);
   let str = std::str::from_utf8_unchecked(slice).to_string();
   Ok(str)
 }
 
 #[napi]
 unsafe fn set_string(mem_id: String, js_string: String) -> Result<()> {
-  let shmem = ShmemConf::new().flink(mem_id).open().unwrap();
-  let ptr = shmem.as_ptr();
-  let string_len = js_string.len();
-  if string_len > shmem.len() as usize {
+  let shmem = ShmemConf::new()
+    .flink(mem_id)
+    .open()
+    .map_err(|_| ShareMemoryError::Uninitialized)?;
+
+  let string_len = js_string.len() as u32;
+  if string_len + 4 > shmem.len() as u32 {
     return Err(ShareMemoryError::SizeOverflow.into());
   }
-  std::ptr::copy(js_string.as_ptr(), ptr, string_len);
+  let string_len_byte = string_len.to_ne_bytes();
+  std::ptr::copy(string_len_byte.as_ptr(), shmem.as_ptr(), 4);
+  std::ptr::copy(
+    js_string.as_ptr(),
+    shmem.as_ptr().offset(4),
+    string_len as usize,
+  );
   Ok(())
 }
 
 #[napi]
-unsafe fn init(mem_id: String, max_size: u32) {
+unsafe fn init(mem_id: String, max_size: u32) -> Result<()> {
+  if metadata(&mem_id).is_ok() {
+    return Err(ShareMemoryError::RepeatInitialized.into());
+  }
   let shmem = ShmemConf::new()
     .size(max_size as usize)
     .flink(&mem_id)
     .create()
     .unwrap();
   Box::into_raw(Box::new(shmem));
+  Ok(())
 }
 
 #[napi]
 unsafe fn clear(mem_id: String) {
-  let global_shmem = GLOBAL_SHMEM.as_mut().unwrap();
-  global_shmem.remove(&mem_id);
+  if metadata(&mem_id).is_ok() {
+    remove_file(mem_id).unwrap();
+  }
 }

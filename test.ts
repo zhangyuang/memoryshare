@@ -1,29 +1,57 @@
 import { fork } from 'child_process'
 import { init, setString, getString, clear } from './index'
 
-
-
 const memId = "string.link"
 
+clear(memId)
 init(memId, 4096)
+
 function generateBigString() {
   let bigStr = '';
-  for (let i = 0; i < 10; i++) {
+  for (let i = 0; i < 1; i++) {
     bigStr += 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. ';
   }
   return bigStr;
 }
 
 
-setString(memId, generateBigString())
-console.log('xxx', getString(memId))
 
-// const child = fork('./child')
+const child = fork('./child')
 
-// child.on('message', (msg: any) => {
-//   if (msg.type === 'ready') {
-//     child.send({
-//       type: 'getData'
-//     })
-//   }
-// });
+export const testByShareMemory = () => {
+  setString(memId, generateBigString())
+  child.send({
+    type: 'share',
+  })
+}
+export const testByIpc = () => {
+  const child = fork('./child')
+  child.send({
+    type: 'ipc',
+    data: generateBigString()
+  })
+}
+if (process.env.TEST) {
+  testByShareMemory()
+}
+child.on('message', msg => {
+  if (msg.type === 'exit') {
+    child.kill()
+    process.exit()
+  }
+})
+
+const errHandleFactory = (eventName) => (err) => {
+  console.log(eventName)
+  console.error(err)
+  if (['SIGINT', 'SIGQUIT', 'SIGHUP'].includes(eventName)) {
+    process.exit(0)
+  } else {
+    process.exit(1)
+  }
+}
+process.on('uncaughtException', errHandleFactory('uncaughtException'));
+process.on('unhandledRejection', errHandleFactory('unhandledRejection'));
+process.on('SIGINT', errHandleFactory('SIGINT'));
+process.on('SIGQUIT', errHandleFactory('SIGQUIT'));
+process.on('SIGHUP', errHandleFactory('SIGHUP'));

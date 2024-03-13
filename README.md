@@ -1,95 +1,78 @@
-# 在 Node.js 不同进程间共享内存
+# Share Memory
 
-`memoryshare` 是一个由 `Rust + Napi` 开发，可以在 `Node.js` 不同进程中共享 `String|Object|Function` 内存的模块。
+`memoryshare` is a module allow Node.js developers share memory between different process
 
-## 支持的功能
+It's high performance when share data is huge than transfer data by IPC
 
-🚀 表示已经实现的功能
+## features
 
-| 里程碑                                                                                                                                                                                                                                          | 状态 |
-| -------------------------------------------------------------------------------------------------------------------------------------- | ---- |
-|  支持回收内存    | 🚀    |
-|  支持跨进程共享字符串    | 🚀    |
-|  支持跨进程共享 byteArray    | 🚀    |
+- High performance ✨
+- Simple api interface 💗
 
+## benchmark
 
+```bash
+$ yarn bench
 
-## 如何使用
+ipc:
+  34 ops/s, ±55.24%       | slowest, 99.73% slower
 
-```js
-// parent.js
-const { fork } = require('child_process')
+sharememory:
+  12 412 ops/s, ±44.21%   | fastest
 
-const sharedMemory = require('memoryshare')
-
-const stringLink = "string.link" // 设置一个内存id memoryId
-
-sharedMemory.setString(stringLink, "shared String") // 使用该内存 id 存储需要共享的字符串
-console.log('Read shared string in parent process', sharedMemory.getString(stringLink))
-const child = fork('./child')
-
-child.send('ready')
-child.on('message', msg => {
-  if (msg === 'finish') {
-    sharedMemory.clear(stringLink) // 当不需要使用后记得在主进程销毁该内存块
-  }
-})
-
-// child.js
-
-const sharedMemory = require('memoryshare')
-process.on("message", msg => {
-  if (msg === "ready") {
-    console.log('Read shared string in child process', sharedMemory.getString("string.link"))
-    process.send("finish")
-    process.exit()
-  }
-})
-
+Finished 2 cases!
+Fastest: sharememory
+Slowest: ipc
+✨  Done in 28.89s.
 ```
-# shared memory for Node.js Process by Rust Napi
 
-`memoryshare` is a module developed using Rust + Napi that allows sharing String|Object|Function memory between different processes in Node.js.
+## Install
 
-## Features Implemented
+```bash
+$ npm i memoryshare # or yarn add memoryshare
+```
 
-🚀 represent features which has been implemented
+## Support Platform
 
-| 里程碑                                                                                                                                                                                                                                          | 状态 |
-| -------------------------------------------------------------------------------------------------------------------------------------- | ---- |
-|  Support memory recycling	    | 🚀    |
-|  Support sharing strings across processes	    | 🚀    |
-|  Support sharing JsObjects across processes (under development)    | In progress    |
+Note: You need to make sure that the compilation environment of the dynamic
+library is the same as the installation and runtime environment of the `memoryshare` call.
 
+- darwin-x64
+- darwin-arm64
+- linux-x64-gnu
+- win32-x64-msvc
+- win32-ia32-msvc
+- linux-arm64-gnu
+- linux-arm64-musl
 
-# How to use
+## How to use
+
+`memoryshare` support for data that can be serialized as string
+
+Here is an example to guide how to share string data between different process
 
 ```js
-// parent.js
-const { fork } = require('child_process')
+// main.js
+import { fork } from 'child_process'
+import { init, setString, getString, clear } from 'memoryshare'
 
-const sharedMemory = require('memoryshare')
+const memId = "string.link"
 
-const stringLink = "string.link" // Set a memory id memoryId
-sharedMemory.setString(stringLink, "shared String") // Store the string to be shared using the memory id
-console.log('Read shared string in parent process', sharedMemory.getString(stringLink))
-const child = fork('./child')
+init(memId, 4096) //  Each memId only should be call init function once
 
-child.send('ready')
-child.on('message', msg => {
-  if (msg === 'finish') {
-    sharedMemory.clear(stringLink) // Remember to destroy the memory block in the main process when it is no longer needed
+function generateBigString() {
+  let bigStr = '';
+  for (let i = 0; i < 1; i++) {
+    bigStr += 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. ';
   }
-})
+  return bigStr;
+}
+
+setString(memId, generateBigString())
+
+fork('./child')
 
 // child.js
-
-const sharedMemory = require('memoryshare')
-process.on("message", msg => {
-  if (msg === "ready") {
-    console.log('Read shared string in child process', sharedMemory.getString("string.link"))
-    process.send("finish")
-    process.exit()
-  }
-})
+const memId = "string.link"
+const data = getString(memId)
 ```

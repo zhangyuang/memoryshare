@@ -19,6 +19,8 @@
     "@napi-rs/cli": "^2.15.2",
     "@types/koa": "^2.15.0",
     "ava": "^5.1.1",
+    "benny": "^3.7.1",
+    "cross-env": "^7.0.3",
     "koa": "^2.14.2",
     "tsx": "^4.7.1"
   },
@@ -32,7 +34,9 @@
     "prepublishOnly": "napi prepublish -t npm",
     "universal": "napi universal",
     "version": "napi version",
-    "test": "rm -rf string.link && npm run build &&  tsx ./test.ts"
+    "test": "cross-env TEST=1 tsx ./test.ts",
+    "bench": "yarn build && cross-env BENCH=1 tsx ./bench.ts",
+    "publish:npm": "node scripts/publish.js && napi prepublish -t npm"
   },
   "optionalDependencies": {
     "memoryshare-darwin-arm64": "1.0.0",
