@@ -1,6 +1,6 @@
 {
   "name": "memoryshare",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "main": "index.js",
   "types": "index.d.ts",
   "napi": {
@@ -22,6 +22,7 @@
     "benny": "^3.7.1",
     "cross-env": "^7.0.3",
     "koa": "^2.14.2",
+    "shelljs": "^0.8.5",
     "tsx": "^4.7.1"
   },
   "engines": {
