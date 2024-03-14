@@ -1,6 +1,6 @@
 {
   "name": "memoryshare",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "main": "index.js",
   "types": "index.d.ts",
   "napi": {
@@ -30,7 +30,7 @@
   },
   "scripts": {
     "artifacts": "napi artifacts",
-    "build": "napi build --platform --release",
+    "build": "node scripts/build.js",
     "build:debug": "napi build --platform",
     "universal": "napi universal",
     "version": "napi version",
