@@ -40,11 +40,12 @@
     "publish:npm": "node scripts/publish.js && napi prepublish -t npm"
   },
   "optionalDependencies": {
-    "memoryshare-darwin-arm64": "1.0.0",
-    "memoryshare-darwin-x64": "1.0.0",
-    "memoryshare-linux-arm64-gnu": "1.0.0",
-    "memoryshare-linux-arm64-musl": "1.0.0",
-    "memoryshare-linux-x64-gnu": "1.0.0",
-    "memoryshare-win32-x64-msvc": "1.0.0"
+    "memoryshare-win32-x64-msvc": "^1.0.1",
+    "memoryshare-darwin-x64": "^1.0.1",
+    "memoryshare-linux-x64-gnu": "^1.0.1",
+    "memoryshare-darwin-arm64": "^1.0.1",
+    "memoryshare-linux-arm64-gnu": "^1.0.1",
+    "memoryshare-linux-arm64-musl": "^1.0.1",
+    "memoryshare-win32-ia32-msvc": "^1.0.1"
   }
 }
