@@ -8,7 +8,7 @@ init(memId, 4096)
 
 function generateBigString() {
   let bigStr = '';
-  for (let i = 0; i < 1; i++) {
+  for (let i = 0; i < 50; i++) {
     bigStr += 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. ';
   }
   return bigStr;

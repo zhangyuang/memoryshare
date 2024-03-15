@@ -5,7 +5,7 @@ const memId = "string.link"
 
 function generateBigString() {
   let bigStr = '';
-  for (let i = 0; i < 100; i++) {
+  for (let i = 0; i < 50; i++) {
     bigStr += 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. ';
   }
   return bigStr;

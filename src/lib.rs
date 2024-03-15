@@ -48,7 +48,7 @@ unsafe fn get_string(mem_id: String) -> Result<String> {
 #[napi]
 unsafe fn set_string(mem_id: String, js_string: String) -> Result<()> {
   let shmem = ShmemConf::new()
-    .flink(mem_id)
+    .flink(&mem_id)
     .open()
     .map_err(|_| ShareMemoryError::Uninitialized)?;
 
