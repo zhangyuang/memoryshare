@@ -58,7 +58,7 @@ import { init, setString, getString, clear } from 'memoryshare'
 
 const memId = "string.link"
 
-init(memId, 4096) //  Each memId only should be call init function once
+init(memId, 4096) // init share memory block with max size,each memId can should be called init function once
 
 function generateBigString() {
   let bigStr = '';
