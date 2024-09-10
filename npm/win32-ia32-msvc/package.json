@@ -8,9 +8,9 @@
     "x64",
     "ia32"
   ],
-  "main": "ffi-rs.win32-ia32-msvc.node",
+  "main": "memoryshare.win32-ia32-msvc.node",
   "files": [
-    "ffi-rs.win32-ia32-msvc.node"
+    "memoryshare.win32-ia32-msvc.node"
   ],
   "license": "MIT",
   "engines": {
