@@ -1,5 +1,5 @@
 import b from 'benny'
-import { testByIpc, testByShareMemory } from './test'
+import { testByIpc, testByShareMemory, testBufferByShareMemory } from './test'
 
 
 
@@ -12,6 +12,9 @@ async function run() {
     }),
     b.add('sharememory', () => {
       testByShareMemory()
+    }),
+    b.add('sharebuffer', () => {
+      testBufferByShareMemory()
     }),
     b.cycle(),
     b.complete(),

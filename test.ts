@@ -1,10 +1,13 @@
 import { fork } from 'child_process'
-import { init, setString, getString, clear } from './index'
+import { init, setString, getString, clear, setBuffer, getBuffer } from './index'
 
 const memId = "string.link"
-
+const bufferMemId = "buffer.link"
 clear(memId)
+clear(bufferMemId)
+
 init(memId, 4096)
+init(bufferMemId, 4096)
 
 function generateBigString() {
   let bigStr = '';
@@ -24,6 +27,13 @@ export const testByShareMemory = () => {
     type: 'share',
   })
 }
+export const testBufferByShareMemory = () => {
+  const buffer = Buffer.from(generateBigString());
+  setBuffer(bufferMemId, buffer);
+  child.send({
+    type: 'shareBuffer',
+  });
+}
 export const testByIpc = () => {
   const child = fork('./child')
   child.send({
@@ -33,8 +43,9 @@ export const testByIpc = () => {
 }
 if (process.env.TEST) {
   testByShareMemory()
+  testBufferByShareMemory();
 }
-child.on('message', msg => {
+child.on('message', (msg: { type: string, data: any }) => {
   if (msg.type === 'exit') {
     child.kill()
     process.exit()

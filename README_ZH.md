@@ -8,6 +8,7 @@
 
 - 高性能 ✨
 - 更简单的 api 接口 💗
+- 支持 String/Buffer 类型 💗
 
 ## benchmark
 
@@ -41,11 +42,16 @@ $ npm i memoryshare # or yarn add memoryshare
 ```js
 // main.js
 import { fork } from 'child_process'
-import { init, setString, getString, clear } from 'memoryshare'
+import { init, setString, getString, clear, setBuffer, getBuffer } from 'memoryshare'
 
 const memId = "string.link"
+const bufferMemId = "buffer.link"
+clear(memId)
+clear(bufferMemId)
 
-init(memId, 4096) // 每一个 memId 的初始化操作只需要做一次
+init(memId, 4096) // init share memory block with max size,each memId should be called only once
+init(bufferMemId, 4096)
+
 
 function generateBigString() {
   let bigStr = '';
@@ -55,11 +61,13 @@ function generateBigString() {
   return bigStr;
 }
 
-setString(memId, generateBigString())
 
+setString(memId, generateBigString())
+setBuffer(bufferMemId, Buffer.from(generateBigString()))
 fork('./child')
 
 // child.js
 const memId = "string.link"
 const data = getString(memId)
+const bufferData = getBuffer(bufferMemId)
 ```

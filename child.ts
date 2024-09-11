@@ -1,7 +1,9 @@
 import { equal } from 'assert'
-import { init, setString, getString, clear } from './index'
+import { init, setString, getString, getBuffer } from './index'
 
 const memId = "string.link"
+
+const bufferMemId = "buffer.link"
 
 function generateBigString() {
   let bigStr = '';
@@ -10,20 +12,28 @@ function generateBigString() {
   }
   return bigStr;
 }
+function generateBigBuffer() {
+  return Buffer.from(generateBigString())
+}
 
-
-process.on('message', msg => {
+process.on('message', (msg: { type: string, data: any }) => {
   if (msg.type === 'share') {
     const data = getString(memId)
     if (!process.env.BENCH) {
       equal(data, generateBigString())
-      process.send({
+      process.send?.({
         type: 'exit'
       })
     }
-
-  }
-  if (msg.type === 'ipc') {
+  } else if (msg.type === 'shareBuffer') {
+    const data = getBuffer(bufferMemId)
+    if (!process.env.BENCH) {
+      equal(data.toString(), generateBigBuffer().toString())
+      process.send?.({
+        type: 'exit'
+      })
+    }
+  } else if (msg.type === 'ipc') {
     const str = msg.data
   }
 })

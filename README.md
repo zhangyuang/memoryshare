@@ -8,21 +8,27 @@ It's high performance when share data is huge than transfer data by IPC
 
 - High performance ✨
 - Simple api interface 💗
+- Support share string andbuffer data 💗
 
 ## benchmark
 
 ```bash
 $ yarn bench
+Running "data transfer" suite...
+Progress: 100%
 
-ipc:
-  34 ops/s, ±55.24%       | slowest, 99.73% slower
+  ipc:
+    26 ops/s, ±96.96%       | slowest, 99.93% slower
 
-sharememory:
-  12 412 ops/s, ±44.21%   | fastest
+  sharememory:
+    13 686 ops/s, ±72.23%   | 65.29% slower
 
-Finished 2 cases!
-Fastest: sharememory
-Slowest: ipc
+  sharebuffer:
+    39 428 ops/s, ±8.67%   | fastest
+
+Finished 3 cases!
+  Fastest: sharebuffer
+  Slowest: ipc
 ✨  Done in 28.89s.
 ```
 
@@ -54,11 +60,16 @@ Here is an example to guide how to share string data between different process
 ```js
 // main.js
 import { fork } from 'child_process'
-import { init, setString, getString, clear } from 'memoryshare'
+import { init, setString, getString, clear, setBuffer, getBuffer } from 'memoryshare'
 
 const memId = "string.link"
+const bufferMemId = "buffer.link"
+clear(memId)
+clear(bufferMemId)
 
 init(memId, 4096) // init share memory block with max size,each memId should be called only once
+init(bufferMemId, 4096)
+
 
 function generateBigString() {
   let bigStr = '';
@@ -68,11 +79,13 @@ function generateBigString() {
   return bigStr;
 }
 
-setString(memId, generateBigString())
 
+setString(memId, generateBigString())
+setBuffer(bufferMemId, Buffer.from(generateBigString()))
 fork('./child')
 
 // child.js
 const memId = "string.link"
 const data = getString(memId)
+const bufferData = getBuffer(bufferMemId)
 ```
