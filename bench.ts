@@ -10,10 +10,10 @@ async function run() {
     b.add('ipc', () => {
       testByIpc()
     }),
-    b.add('sharememory', () => {
+    b.add('shareString', () => {
       testByShareMemory()
     }),
-    b.add('sharebuffer', () => {
+    b.add('shareBuffer', () => {
       testBufferByShareMemory()
     }),
     b.cycle(),

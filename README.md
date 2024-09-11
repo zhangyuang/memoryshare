@@ -20,10 +20,10 @@ Progress: 100%
   ipc:
     26 ops/s, ±96.96%       | slowest, 99.93% slower
 
-  sharememory:
+  sharString:
     13 686 ops/s, ±72.23%   | 65.29% slower
 
-  sharebuffer:
+  shareBuffer:
     39 428 ops/s, ±8.67%   | fastest
 
 Finished 3 cases!

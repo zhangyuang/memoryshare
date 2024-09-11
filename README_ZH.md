@@ -14,16 +14,21 @@
 
 ```bash
 $ yarn bench
+Running "data transfer" suite...
+Progress: 100%
 
-ipc:
-  34 ops/s, ±55.24%       | slowest, 99.73% slower
+  ipc:
+    26 ops/s, ±96.96%       | slowest, 99.93% slower
 
-sharememory:
-  12 412 ops/s, ±44.21%   | fastest
+  sharString:
+    13 686 ops/s, ±72.23%   | 65.29% slower
 
-Finished 2 cases!
-Fastest: sharememory
-Slowest: ipc
+  shareBuffer:
+    39 428 ops/s, ±8.67%   | fastest
+
+Finished 3 cases!
+  Fastest: sharebuffer
+  Slowest: ipc
 ✨  Done in 28.89s.
 ```
 
