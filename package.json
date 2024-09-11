@@ -1,6 +1,6 @@
 {
   "name": "memoryshare",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "main": "index.js",
   "types": "index.d.ts",
   "napi": {
@@ -44,12 +44,12 @@
     "publish:npm": "node scripts/publish.js && napi prepublish -t npm"
   },
   "optionalDependencies": {
-    "memoryshare-win32-x64-msvc": "^1.0.1",
-    "memoryshare-darwin-x64": "^1.0.1",
-    "memoryshare-linux-x64-gnu": "^1.0.1",
-    "memoryshare-darwin-arm64": "^1.0.1",
-    "memoryshare-linux-arm64-gnu": "^1.0.1",
-    "memoryshare-linux-arm64-musl": "^1.0.1",
-    "memoryshare-win32-ia32-msvc": "^1.0.1"
+    "memoryshare-win32-x64-msvc": "1.0.7",
+    "memoryshare-darwin-x64": "1.0.7",
+    "memoryshare-linux-x64-gnu": "1.0.7",
+    "memoryshare-darwin-arm64": "1.0.7",
+    "memoryshare-linux-arm64-gnu": "1.0.7",
+    "memoryshare-linux-arm64-musl": "1.0.7",
+    "memoryshare-win32-ia32-msvc": "1.0.7"
   }
 }
